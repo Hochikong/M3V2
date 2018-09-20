@@ -32,8 +32,10 @@ const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
-    height: 610,
+    height: 599,
     show: false,
+    resizable: false,
+    backgroundColor: '#938D7F',
   });
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
@@ -85,8 +87,10 @@ function createNewHelpWindow(father) {
   const tmp = new BrowserWindow({
     parent: father,
     width: 700,
-    height: 718,
+    height: 707,
     show: false,
+    resizable: false,
+    backgroundColor: '#938D7F',
   });
   tmp.loadURL(`file://${__dirname}/help.html`);
   return tmp;
