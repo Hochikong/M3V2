@@ -1,0 +1,147 @@
+body {
+    margin: 0px;
+}
+
+.footer a:link {
+    color: #FF4831;
+    text-decoration: none;
+}
+
+.footer a:visited {
+    color: #FF4831;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+#home .el-header {
+    height: 40px;
+    background-color: #C7C5B8;
+    color: #333;
+    line-height: 10px;
+}
+
+.subpage .el-header {
+    font-family: 微软雅黑, serif;
+    background-color: #C7C5B8;
+    line-height: 60px;
+    font-size: 30px;
+}
+
+.el-footer {
+    font-family: 微软雅黑, serif;
+    word-spacing: 5px;
+    height: 40px;
+    background-color: #C7C5B8;
+    color: #333;
+    text-align: right;
+    line-height: 40px;
+}
+
+#home .el-main {
+    font-family: 微软雅黑, serif;
+    background-color: #E9E9E1;
+    color: #333;
+    text-align: center;
+    line-height: 10px;
+}
+
+.subpage .el-main {
+    font-family: 微软雅黑, serif;
+    background-color: #E9E9E1;
+    line-height: 20px;
+}
+
+.subpage .el-main {
+    font-family: 微软雅黑, serif;
+}
+
+.el-row {
+    margin-bottom: 50px;
+}
+
+.el-row:last-child {
+    margin-bottom: 0;
+}
+
+.el-col {
+    border-radius: 4px;
+    line-height: 20px;
+}
+
+.bg-purple-dark {
+    background: #99a9bf;
+}
+
+.bg-purple {
+    background: #E9EEF3;
+}
+
+.bg-purple-light {
+    background: #e5e9f2;
+}
+
+.grid-content {
+    border-radius: 4px;
+    min-height: 36px;
+}
+
+.row-bg {
+    padding: 10px 0;
+    background-color: #f9fafc;
+}
+
+.item {
+    margin-bottom: 18px;
+}
+
+.box-card {
+    width: 480px;
+    margin: 10px;
+}
+
+.el-card {
+    line-height: 4px;
+    font-family: 微软雅黑;
+}
+
+#detailPanel {
+    color: #32383e;
+}
+
+h1 {
+    color: #4b4c4d;
+}
+
+.grid-content {
+    text-align: left;
+    line-height: 20px;
+}
+
+.mainMenu {
+    font-size: 30px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.mainMenu:hover {
+    color: #FF4831;
+}
+
+.returnBtn:hover {
+    cursor: pointer;
+}
+
+.el-input {
+    width: 130px;
+}
+
+.addBtn {
+    font-family: 微软雅黑, serif;
+}
+
+.addDailyExpend .el-input {
+    width: 200px;
+}

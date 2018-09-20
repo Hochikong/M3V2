@@ -1,0 +1,1109 @@
+<!--
+  ~ Copyright 2018 Hochikong
+  ~ All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MMM v2 预算管理软件</title>
+    <!-- 引入1953主题 -->
+    <link rel="stylesheet" href="local-lib/theme/index.css">
+    <!-- 自定义css -->
+    <link rel="stylesheet" href="local-lib/corestylesheet.css">
+    <script src="local-lib/vue.js"></script>
+    <script src="local-lib/elementui.js"></script>
+    <script src="local-lib/corefunc.js"></script>
+</head>
+<body>
+<div id="app">
+    <!-- template页面高度为552px  -->
+    <template v-if="page === 'home'">
+        <div id="home">
+            <el-container>
+                <!-- 头部卡片展示区 -->
+                <el-header height=210px>
+                    <el-tooltip class="item" effect="dark" content="月度预算计划相关信息" placement="right-start">
+                        <el-card class="box-card" shadow="always">
+                            <h1>今日可使用余额：{{ todayAverageRemainView }}</h1>
+                            <div id="detailPanel">
+                                <br>
+                                <h3>总预算额：{{ budgetTotalView }}</h3>
+                                <h3>可支配余额：{{ totalMinusDepositView }}</h3>
+                                <h3>目标储蓄额（含摊销）：{{ targetDepositView }}</h3>
+                                <h3>本月剩余天数（含今日）：{{ remainDaysThisMonthView }}</h3>
+                            </div>
+                        </el-card>
+                    </el-tooltip>
+                </el-header>
+
+                <!--中间菜单-->
+                <el-main style="height: 297px">
+
+                    <!--第一行-->
+                    <el-row :gutter="20">
+                        <el-col :span="12">
+                            <div class="grid-content bg-purple">
+                                <el-container>
+                                    <el-main height="100px">
+                                        <div @click="changePage('setting')" class="mainMenu">
+                                            <img src="local-icons/baseline-build-24px.svg"
+                                                 style="vertical-align:middle"> 添加资产
+                                        </div>
+                                    </el-main>
+                                </el-container>
+                            </div>
+                        </el-col>
+                        <el-col :span="12">
+                            <div class="grid-content bg-purple">
+                                <el-container>
+                                    <el-main height="100px">
+                                        <div @click="changePage('assets')" class="mainMenu">
+                                            <img src="local-icons/baseline-attach_money-24px.svg"
+                                                 style="vertical-align:middle">资产信息
+                                        </div>
+                                    </el-main>
+                                </el-container>
+                            </div>
+                        </el-col>
+                    </el-row>
+
+                    <!--第二行-->
+                    <el-row :gutter="20">
+                        <el-col :span="12">
+                            <div class="grid-content bg-purple">
+                                <el-container>
+                                    <el-main height="100px">
+                                        <div @click="changePage('UE')" class="mainMenu">
+                                            <img src="local-icons/baseline-assessment-24px.svg"
+                                                 style="vertical-align:middle">
+                                            待摊费用
+                                        </div>
+                                    </el-main>
+                                </el-container>
+                            </div>
+                        </el-col>
+                        <el-col :span="12">
+
+                            <!--追加支出弹窗-->
+                            <el-dialog
+                                    title="提示"
+                                    :visible.sync="dialogVisible"
+                                    width="50%"
+                                    :before-close="handleClose">
+                                <div class="addDailyExpend">
+                                    <el-input
+                                            size="medium"
+                                            placeholder="请输入支出"
+                                            suffix-icon="el-icon-date"
+                                            v-model="dayCost">
+                                    </el-input>
+                                    <br>
+                                    <br>
+                                    <el-tooltip class="item" effect="dark" content="默认一笔一笔追加支出，选择自动计算则
+                                        自动计算原资金与现资金余额的差值" placement="bottom">
+                                        <el-switch
+                                                style="display: block"
+                                                v-model="singleExpendItem"
+                                                active-color="#938D7F"
+                                                inactive-color="#116C3C"
+                                                active-text="单笔支出追加"
+                                                inactive-text="自动计算支出">
+                                        </el-switch>
+                                    </el-tooltip>
+                                </div>
+                                <span slot="footer" class="dialog-footer">
+                                <el-button @click="closeExpendAppendDialog">关 闭</el-button>
+                                <el-button type="primary" @click="appendExpendDialog">追 加</el-button>
+                                </span>
+                            </el-dialog>
+
+                            <el-button type="text" class="addBtn" @click="dialogVisible = true">追加今日支出</el-button>
+                        </el-col>
+                    </el-row>
+                </el-main>
+                <el-footer height=45px>
+                    <div class="footer">
+                        <a href="#" @click="showHelp">Help</a>
+                        <a href="#" @click="showAbout">About</a>
+                    </div>
+                </el-footer>
+            </el-container>
+        </div>
+    </template>
+
+    <!--资产添加页面-->
+    <template v-if="page === 'setting'">
+        <div class="subpage">
+            <el-container>
+                <el-container>
+
+                    <!--返回按钮-->
+                    <el-header height=95px>
+                        <div @click="changePage('home')" class="returnBtn">
+                            <img src="local-icons/baseline-keyboard_arrow_left-24px.svg"
+                                 style="vertical-align:middle; transform:scale(1.5)">返回
+                        </div>
+                    </el-header>
+
+                    <!--页面主体-->
+                    <el-main style="height: 412px">
+                        <el-tabs v-model="activeName2" type="card" @tab-click="handleClick">
+
+                            <!--第一个tab-->
+                            <el-tab-pane label="设置本月预算" name="first">
+                                <el-container>
+                                    <el-aside width="150px">
+                                        <p>
+                                            此处设置用于每月预算计划
+                                        </p>
+                                    </el-aside>
+                                    <el-main>
+                                        <div style="line-height: 30px">
+                                            设置预算月份：
+                                            <el-input
+                                                    placeholder="请输入内容"
+                                                    v-model="budgetMonth"
+                                                    :disabled="true">
+                                            </el-input>
+                                            <br>
+                                            <br>
+                                            本月预算总额：
+                                            <el-input
+                                                    placeholder="请输入内容"
+                                                    v-model="budgetTotal"
+                                                    clearable>
+                                            </el-input>
+                                            <br>
+                                            <br>
+                                            目标储蓄额度：
+                                            <el-input
+                                                    placeholder="请输入内容"
+                                                    v-model="budgetDeposit"
+                                                    clearable>
+                                            </el-input>
+                                            <br>
+                                            <br>
+                                            <el-button type="primary" @click="updateBudget">应用设定</el-button>
+                                        </div>
+                                    </el-main>
+                                </el-container>
+                            </el-tab-pane>
+
+                            <!--第二个tab-->
+                            <el-tab-pane label="添加其他资产" name="second">
+                                <el-container>
+                                    <el-aside width="150px">
+                                        <p>
+                                            此处用于记录其他资产信息
+                                        </p>
+                                    </el-aside>
+                                    <el-main>
+                                        <div style="line-height: 30px">
+                                            资产名称：
+                                            <el-input
+                                                    placeholder="请输入内容"
+                                                    v-model="assetName"
+                                                    clearable>
+                                            </el-input>
+                                            <br>
+                                            <br>
+                                            资产类别：
+                                            <el-select v-model="assetType" clearable placeholder="请选择">
+                                                <el-option
+                                                        v-for="item in options"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                </el-option>
+                                            </el-select>
+                                            <br>
+                                            <br>
+                                            资产数量：
+                                            <el-input
+                                                    placeholder="请输入内容"
+                                                    v-model="assetAmount"
+                                                    clearable>
+                                            </el-input>
+                                            <br>
+                                            <br>
+                                            <el-button type="primary" @click="appendAsset">应用设定</el-button>
+                                        </div>
+                                    </el-main>
+                                </el-container>
+                            </el-tab-pane>
+
+                            <!--第三个tab-->
+                            <el-tab-pane label="添加待摊费用" name="third">
+                                <el-container>
+                                    <el-aside width="150px">
+                                        <p>
+                                            此处用于记录用户的待摊费用项
+                                        </p>
+                                    </el-aside>
+                                    <el-main>
+                                        <div style="line-height: 30px">
+                                            费用名称：
+                                            <el-input
+                                                    placeholder="请输入内容"
+                                                    v-model="ueName"
+                                                    clearable>
+                                            </el-input>
+                                            <br>
+                                            <br>
+                                            待摊额度：
+                                            <el-input
+                                                    placeholder="请输入内容"
+                                                    v-model="ueTotal"
+                                                    clearable>
+                                            </el-input>
+                                            <br>
+                                            <br>
+                                            <el-button type="primary" @click="appendUE">应用设定</el-button>
+                                        </div>
+                                    </el-main>
+                                </el-container>
+                            </el-tab-pane>
+
+                        </el-tabs>
+                    </el-main>
+
+                    <el-footer height=45px>
+                        <div class="footer">
+                            <a href="#" @click="showHelp">Help</a>
+                            <a href="#" @click="showAbout">About</a>
+                        </div>
+                    </el-footer>
+                </el-container>
+            </el-container>
+        </div>
+    </template>
+
+    <!--资产列表查看页面-->
+    <template v-if="page === 'assets'">
+        <div class="subpage">
+            <el-container>
+                <el-container>
+                    <el-header height=95px>
+                        <div @click="changePage('home')" class="returnBtn">
+                            <img src="local-icons/baseline-keyboard_arrow_left-24px.svg"
+                                 style="vertical-align:middle; transform:scale(1.5)">返回
+                        </div>
+                    </el-header>
+
+                    <el-main style="height: 412px">
+                        <el-container>
+                            <el-aside width="200px">
+                                <br>
+
+                                <!--两个按钮-->
+                                <el-button type="success" icon="el-icon-star-off" circle
+                                           @click="cancelASSelect"></el-button>
+                                取消已选中
+                                <br>
+                                <br>
+                                <el-button type="danger" icon="el-icon-delete" circle
+                                           @click="delectASSelect"></el-button>
+                                删除已选中
+                                <br>
+                                <br>
+
+                                <!--资产表单-->
+                                选择资产项目:
+                                <el-select v-model="specifyAssetItem" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in assetsView"
+                                            :key="item.id"
+                                            :label="item.name"
+                                            :value="item.id">
+                                    </el-option>
+                                </el-select>
+                                <br>
+                                <br>
+                                目前数量：
+                                <el-input
+                                        placeholder="请输入内容"
+                                        v-model="assetCurrent"
+                                        clearable>
+                                </el-input>
+                                <br>
+                                <br>
+                                <el-button type="success" @click="updateAssetRemain">更新余额</el-button>
+                            </el-aside>
+                            <el-main>
+
+                                <!--ref差不多相当于表名，在对表格操作的函数中通过vm.$ref使用到-->
+                                <el-table
+                                        ref="assetsTable"
+                                        :data="assetsView"
+                                        style="width: 100%"
+                                        @selection-change="handleSelectionChange">
+                                    <el-table-column
+                                            type="selection"
+                                            width="40">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="name"
+                                            label="名称"
+                                            width="150">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="type"
+                                            label="类别"
+                                            width="150">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="remain"
+                                            label="剩余"
+                                            width="150">
+                                    </el-table-column>
+                                </el-table>
+                            </el-main>
+                        </el-container>
+                    </el-main>
+                    <el-footer height=45px>
+                        <div class="footer">
+                            <a href="#" @click="showHelp">Help</a>
+                            <a href="#" @click="showAbout">About</a>
+                        </div>
+                    </el-footer>
+                </el-container>
+            </el-container>
+        </div>
+    </template>
+
+    <!--待摊费用列表-->
+    <template v-if="page === 'UE'">
+        <div class="subpage">
+            <el-container>
+                <el-container>
+                    <el-header height=95px>
+                        <div @click="changePage('home')" class="returnBtn">
+                            <img src="local-icons/baseline-keyboard_arrow_left-24px.svg"
+                                 style="vertical-align:middle; transform:scale(1.5)">返回
+                        </div>
+                    </el-header>
+
+                    <el-main style="height: 412px">
+                        <el-container>
+                            <el-aside width="200px">
+                                <br>
+                                <el-button type="success" icon="el-icon-star-off" circle
+                                           @click="cancelUESelect"></el-button>
+                                取消已选中
+                                <br>
+                                <br>
+                                <el-button type="danger" icon="el-icon-delete" circle
+                                           @click="delectUESelect"></el-button>
+                                删除已选中
+                                <br>
+                                <br>
+                                选择摊销项目:
+                                <el-select v-model="specifyUEItem" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in ueItemsView"
+                                            :key="item.id"
+                                            :label="item.name"
+                                            :value="item.id">
+                                    </el-option>
+                                </el-select>
+                                <br>
+                                <br>
+                                本月摊销额度：
+                                <el-input
+                                        placeholder="请输入内容"
+                                        v-model="ueThisMonth"
+                                        clearable>
+                                </el-input>
+                                <br>
+                                <br>
+                                <el-button type="success" @click="addAmortize">摊销</el-button>
+                            </el-aside>
+                            <el-main>
+                                <el-table
+                                        ref="ueTable"
+                                        :data="ueItemsView"
+                                        style="width: 100%"
+                                        @selection-change="handleSelectionChange">
+                                    <el-table-column
+                                            type="selection"
+                                            width="40">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="name"
+                                            label="名称"
+                                            width="150">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="remain"
+                                            label="剩余费用"
+                                            width="150">
+                                    </el-table-column>
+                                </el-table>
+                            </el-main>
+                        </el-container>
+                    </el-main>
+                    <el-footer height=45px>
+                        <div class="footer">
+                            <a href="#" @click="showHelp">Help</a>
+                            <a href="#" @click="showAbout">About</a>
+                        </div>
+                    </el-footer>
+                </el-container>
+            </el-container>
+        </div>
+    </template>
+</div>
+</body>
+<script>
+  const { ipcRenderer, remote } = require('electron');
+
+  function queryCache() {
+    // 发送请求查询cache，不能直接用sendSync，ipcMain需要设置event.returnValue
+    ipcRenderer.send('RTOM', { head: 'query' });
+  }
+
+  function queryCacheForCheck() {
+    // 当程序计算了dayAverage但没有持久化的时候调用此函数
+    ipcRenderer.send('RTOMCheck', { head: 'query' });
+  }
+
+  function persistence() {
+    // 将数据进行持久化
+    ipcRenderer.send('RTOM', { head: 'update', body: userDataCache.generatePersistenceBody() });
+  }
+
+  function cleanDayAverageAndDayCost(meta) {
+    // 用于每天启动清空旧的dayAverage和dayCost，并数据持久化
+    if (!sameYearMonthDay(meta)) {
+      let queryResult = userDataCache.factoryData.assetsBody.findAssetByID('budget');
+      queryResult.dayAverage = 0;
+      queryResult.dayCost = 0;
+      persistence();
+    }
+  }
+
+  function recalViewValue() {
+    // 用于重新计算展示用的数值
+    const budgetExists = userDataCache.factoryData.assetsBody.hasBudget();
+    const remainDays = remainDaysThisMonthContainToday(getCurrent());
+    if (budgetExists) {
+      if (budgetExists.dayCost > 0) {
+        return {
+          bTV: parseFloat(budgetExists.amount.toFixed(2)),
+          tMDV: parseFloat(budgetExists.remain.toFixed(2)),
+          tDV: parseFloat(budgetExists.deposit.toFixed(2)),
+          tARV: parseFloat(budgetExists.dayAverage.toFixed(2)),
+          rD: remainDays,
+        };
+      } else {
+        return {
+          bTV: parseFloat(budgetExists.amount.toFixed(2)),
+          tMDV: parseFloat(budgetExists.remain.toFixed(2)),
+          tDV: parseFloat(budgetExists.deposit.toFixed(2)),
+          tARV: parseFloat((budgetExists.remain / remainDays).toFixed(2)),
+          rD: remainDays,
+        };
+      }
+    }
+  }
+
+  function assetAndUEViewSync() {
+    // 将数据同步到vueData中，同时把新的dayAverage更新到userDataCache中，顺便把type翻译成中文字符串
+    const needRecalViewValue = recalViewValue();
+    if (needRecalViewValue) {
+      vueData.todayAverageRemainView = needRecalViewValue.tARV;
+      vueData.budgetTotalView = needRecalViewValue.bTV;
+      vueData.totalMinusDepositView = needRecalViewValue.tMDV;
+      vueData.targetDepositView = needRecalViewValue.tDV;
+      vueData.remainDaysThisMonthView = needRecalViewValue.rD;
+      userDataCache.factoryData.assetsBody.updateAssetByID('budget', { dayAverage: needRecalViewValue.tARV });
+    }
+    //
+    vueData.assetsView = [];
+    for (let index = 0; index < userDataCache.factoryData.assetsBody.assets.length; index++) {
+      if (userDataCache.factoryData.assetsBody.assets[index].id !== 'budget') {
+        vueData.assetsView.push(userDataCache.factoryData.assetsBody.assets[index]);
+      }
+    }
+    for (let index = 0; index < vueData.assetsView.length; index++) {
+      if (vueData.assetsView[index].type === 'asset') {
+        vueData.assetsView[index].type = '资产';
+      }
+      if (vueData.assetsView[index].type === 'realAsset') {
+        vueData.assetsView[index].type = '实物资产';
+      }
+    }
+    vueData.ueItemsView = userDataCache.factoryData.ueBody.ueItems;
+  }
+
+  // 数据的核心，作为渲染进程和主进程的数据交换中介
+  let userDataCache = {
+    meta: generateMeta(),
+    userDataOldMeta: undefined,
+    factoryData: {
+      assetsBody: userAssetsFactory(),
+      ueBody: userUEFactory(),
+      operations: opsRecorderFactory()
+    },
+    generatePersistenceBody: function () {
+      return {
+        meta: this.meta,
+        assets: this.factoryData.assetsBody.assets,
+        ueItems: this.factoryData.ueBody.ueItems,
+        operations: this.factoryData.operations.operations,
+      };
+    }
+  };
+
+  /*
+  页面数据的交换区，当主进程发送数据到userDataCache，就通过同步函数复制到这里，
+  而用户输入的数据将临时保存在此并由函数获取处理
+  **/
+  const vueData = {
+    // home页头部卡片
+    todayAverageRemainView: 0,
+    budgetTotalView: 0,
+    totalMinusDepositView: 0,
+    targetDepositView: 0,
+    remainDaysThisMonthView: 0,
+    // 追加支出
+    dayCost: 0,
+    singleExpendItem: true,
+    // template间切换
+    page: 'home',
+    // tab专用
+    activeName2: 'first',
+    // 对话框专用
+    dialogVisible: false,
+    // 资产和待摊费用检查表格的多选专用
+    multipleSelection: [],
+    // 预算添加
+    budgetMonth: userDataCache.meta.recordMonth,
+    budgetTotal: 0,
+    budgetDeposit: 0,
+    // 资产添加
+    options: [{
+      value: 'asset',
+      label: '资产'
+    }, {
+      value: 'realAsset',
+      label: '实物资产'
+    },],
+    assetType: '',
+    assetName: '',
+    assetAmount: 0,
+    // 待摊费用添加
+    ueName: '',
+    ueTotal: 0,
+    // assets页
+    assetCurrent: 0,
+    specifyAssetItem: '',
+    assetsView: [],
+    // ue page
+    ueThisMonth: 0,
+    specifyUEItem: '',
+    ueItemsView: [],
+  };
+
+  const vm = new Vue({
+    el: '#app',
+    data: vueData,
+    methods: {
+      // 页面切换使用的函数
+      changePage: function (page) {
+        this.page = page;
+        this.multipleSelection = [];
+      },
+
+      // 提醒用户没有预算计划
+      supriseMTF: function () {
+        this.$alert('尚未保存任何预算计划或原计划已过期，请进行设置', '欢迎使用', {
+          confirmButtonText: '请带我去设置',
+          callback: action => {
+            this.changePage('setting');
+          }
+        });
+      },
+
+      // 添加预算计划
+      updateBudget: function () {
+        // 判断数据有没有全部输入
+        let allRequire = dataRequireCheckPass(vueData, [['budgetTotal', 0], ['budgetDeposit', 0]]);
+        if (!allRequire) {
+          this.dataRequireAlert();
+          this.cleanAssetUpdateInput();
+          return true;
+        }
+        // 判断数据类型是否合法
+        let cleanUp = this.multipleTypeCheck([this.budgetTotal, this.budgetDeposit]);
+        if (cleanUp) {
+          this.cleanAssetUpdateInput();
+          return true;
+        }
+        // 写入预算计划, budgetExists默认为false
+        // 当budget不存在时
+        if (!budgetExists) {
+          userDataCache.factoryData.assetsBody.appendAsset(generateBudgetBody(parseFloat(this.budgetTotal),
+            (parseFloat(this.budgetDeposit) + userDataCache.factoryData.ueBody.calSameYMAmortizeTotal())));
+          persistence();
+          this.cleanAssetUpdateInput();
+          this.$message({
+            showClose: true,
+            message: '已更新计划',
+            type: 'success'
+          });
+        } else {
+          // 覆盖原有计划
+          this.$confirm('执行此操作将覆盖现有预算计划?', '警告', {
+            confirmButtonText: '无论如何都要',
+            cancelButtonText: '算了，放弃',
+            type: 'warning'
+          })
+            .then(() => {  // press confirm btn
+              userDataCache.factoryData.assetsBody.removeAssetByID('budget');
+              userDataCache.factoryData.assetsBody.appendAsset(generateBudgetBody(parseFloat(this.budgetTotal),
+                (parseFloat(this.budgetDeposit) + userDataCache.factoryData.ueBody.calSameYMAmortizeTotal())));
+              persistence();
+              this.cleanAssetUpdateInput();
+              this.$message({
+                showClose: true,
+                message: '已更新计划',
+                type: 'success'
+              });
+            })
+            .catch(() => {  // press cancel btn
+              this.cancelBudgetUpdate();
+              this.$message({
+                type: 'info',
+                showClose: true,
+                message: '已取消更新'
+              });
+            });
+        }
+      },
+
+      // 清空输入并返回消息
+      cancelBudgetUpdate: function () {
+        this.budgetTotal = 0;
+        this.budgetDeposit = 0;
+        this.$message({
+          showClose: true,
+          message: '已取消更新',
+          type: 'info'
+        });
+      },
+
+      // 只清空输入
+      cleanAssetUpdateInput: function () {
+        this.budgetTotal = 0;
+        this.budgetDeposit = 0;
+      },
+
+      // 追加资产，清理输入
+      appendAsset: function () {
+        let allRequire = dataRequireCheckPass(vueData, [['assetName', ''], ['assetAmount', 0], ['assetType', '']]);
+        if (!allRequire) {
+          this.dataRequireAlert();
+          this.cleanAssetInput();
+          return true;
+        }
+        let cleanUp = this.multipleTypeCheck([this.assetAmount,]);
+        if (cleanUp) {
+          this.cleanAssetInput();
+          return true;
+        }
+        userDataCache.factoryData.assetsBody.appendAsset(generateAssetBody(this.assetName, parseFloat(this.assetAmount)
+          , this.assetType));
+        persistence();
+        this.$message({
+          showClose: true,
+          message: '资产已添加',
+          type: 'success'
+        });
+        this.cleanAssetInput();
+      },
+      cleanAssetInput: function () {
+        this.assetName = undefined;
+        this.assetAmount = 0;
+        this.assetType = '';
+      },
+
+      // 追加待摊费用，清理输入
+      appendUE: function () {
+        let allRequire = dataRequireCheckPass(vueData, [['ueName', ''], ['ueTotal', 0]]);
+        if (!allRequire) {
+          this.dataRequireAlert();
+          this.cleanUEInput();
+          return true;
+        }
+        let cleanUp = this.multipleTypeCheck([this.ueTotal,]);
+        if (cleanUp) {
+          this.cleanUEInput();
+          return true;
+        }
+        userDataCache.factoryData.ueBody.appendUEItem(generateUEBody(this.ueName, parseFloat(this.ueTotal)));
+        persistence();
+        this.$message({
+          showClose: true,
+          message: '费用已添加',
+          type: 'success'
+        });
+        this.cleanUEInput();
+      },
+      cleanUEInput: function () {
+        this.ueName = '';
+        this.ueTotal = 0;
+      },
+
+      // 列表中选定项进行余额更新，清空输入
+      updateAssetRemain: function () {
+        let allRequire = dataRequireCheckPass(vueData, [['specifyAssetItem', ''], ['assetCurrent', 0]]);
+        if (!allRequire) {
+          this.dataRequireAlert();
+          this.cleanAssetRemainInput();
+          return true;
+        }
+        let cleanUp = this.multipleTypeCheck([this.assetCurrent,]);
+        if (cleanUp) {
+          this.cleanAssetRemainInput();
+          return true;
+        }
+        userDataCache.factoryData.assetsBody.updateAssetByID(this.specifyAssetItem, { remain: parseFloat(this.assetCurrent) });
+        persistence();
+        this.$message({
+          showClose: true,
+          message: '数量已更新',
+          type: 'success'
+        });
+        this.cleanAssetRemainInput();
+      },
+      cleanAssetRemainInput: function () {
+        this.specifyAssetItem = '';
+        this.assetCurrent = 0;
+      },
+
+      // 待摊费用列表中选定项进行费用摊分，清空输入
+      addAmortize: function () {
+        let allRequire = dataRequireCheckPass(vueData, [['specifyUEItem', ''], ['ueThisMonth', 0]]);
+        if (!allRequire) {
+          this.dataRequireAlert();
+          this.cleanAmortizeInput();
+          return true;
+        }
+        let cleanUp = this.multipleTypeCheck(this.ueThisMonth);
+        if (cleanUp) {
+          this.cleanAmortizeInput();
+          return true;
+        }
+        let queryResult0 = userDataCache.factoryData.ueBody.findUEItemByID(this.specifyUEItem);
+        if (queryResult0.amortize) {
+          queryResult0.amortize.amount += this.ueThisMonth;
+        }
+        userDataCache.factoryData.ueBody.updateUEItemByID(this.specifyUEItem, {
+          amortize: {
+            meta: generateMeta(), amount: parseFloat(this.ueThisMonth)
+          }
+        });
+        let delta = queryResult0.remain - parseFloat(this.ueThisMonth);
+        queryResult0.remain = delta > 0 ? delta : 0;
+        let queryResult = userDataCache.factoryData.assetsBody.findAssetByID('budget');
+        queryResult.deposit = queryResult.deposit + parseFloat(this.ueThisMonth);
+        queryResult.remain = queryResult.amount - queryResult.deposit;
+        persistence();
+        this.$message({
+          showClose: true,
+          message: '摊销额已更新，将追加到本月储蓄额度中',
+          type: 'success'
+        });
+        this.cleanAmortizeInput();
+      },
+      cleanAmortizeInput: function () {
+        this.specifyUEItem = '';
+        this.ueThisMonth = 0;
+      },
+
+      // 提醒还有待摊费用的记录
+      ueTips: function () {
+        this.$confirm('你尚有未摊销完的费用，稍后请检查', '提醒', {
+          confirmButtonText: '我知道了',  // left cancel right confirm
+          cancelButtonText: '关闭',
+          type: 'warning'
+        })
+          .then(() => {  // press confirm btn
+
+          })
+          .catch(() => {  // press cancel btn
+
+          });
+      },
+
+      // 关闭添加支出的对话框
+      closeExpendAppendDialog: function () {
+        this.dayCost = 0;
+        this.singleExpendItem = true;
+        this.dialogVisible = false;
+        this.$message({
+          showClose: true,
+          message: '已取消操作',
+          type: 'info'
+        });
+      },
+
+      // 在对话框中添加支出
+      appendExpendDialog: function () {
+        // 默认的单项支出添加
+        if (this.singleExpendItem) {
+          let queryResult = userDataCache.factoryData.assetsBody.findAssetByID('budget');
+          queryResult.dayCost += parseFloat(this.dayCost);
+          queryResult.dayAverage -= parseFloat(this.dayCost);
+          queryResult.remain -= parseFloat(this.dayCost);
+          persistence();
+          this.closeExpendAppendDialog();
+          this.$message({
+            showClose: true,
+            message: '开支已追加',
+            type: 'success'
+          });
+          // 自动计算支出
+        } else {
+          let queryResult = userDataCache.factoryData.assetsBody.findAssetByID('budget');
+          let oldAmount = queryResult.amount;
+          let todayCost = oldAmount - parseFloat(this.dayCost);
+          if (todayCost < 0) {
+            // 超支状态
+            queryResult.amount = todayCost;
+            queryResult.remain = todayCost - queryResult.deposit;
+            queryResult.dayAverage = 0;
+          } else {
+            queryResult.dayCost += todayCost;
+            queryResult.dayAverage -= todayCost;
+            queryResult.remain -= todayCost;
+          }
+          persistence();
+          this.closeExpendAppendDialog();
+          this.$message({
+            showClose: true,
+            message: '开支已追加',
+            type: 'success'
+          });
+        }
+      },
+
+      // 警告数据输入不全
+      dataRequireAlert: function () {
+        this.$alert('输入数据缺失', '提醒', {
+          confirmButtonText: '了解',
+        });
+      },
+
+      // 警告数据格式不符合
+      typeCheckAlert: function () {
+        this.$alert('数据格式有误，更新失败', '提醒', {
+          confirmButtonText: '了解',
+        });
+      },
+
+      // 检查指定的变量是否为数值类型
+      multipleTypeCheck: function (parameters) {
+        let notNumericCount = 0;
+        for (const index in parameters) {
+          if (notNumericType(parameters[index])) {
+            notNumericCount += 1;
+          }
+        }
+        if (notNumericCount > 0) {
+          this.typeCheckAlert();
+          return true;
+        }
+      },
+
+      // 弹出帮助窗口
+      showHelp: function () {
+        ipcRenderer.send('showHelp', 'show');
+      },
+
+      // 关于窗口
+      showAbout: function () {
+        alert('Copyright 2018 Hochikong \nAll Rights Reserved. \n\n' +
+          '此程序基于Apache License 2.0 许可证开源\n' +
+          'Email: ckhoidea@hotmail.com');
+      },
+
+      // 框架专用处理函数
+      handleClick: function (tab, event) {
+        // pass
+      },
+      handleClose: function (done) {
+        this.$confirm('放弃操作？')
+          .then(_ => {
+            done();
+          })
+          .catch(_ => {
+          });
+      },
+
+      // 取消资产表格全选
+      cancelASSelect: function () {
+        this.$refs.assetsTable.clearSelection();
+      },
+
+      // 删除资产表格选定项
+      delectASSelect: function () {
+        if (this.multipleSelection.length < 1) {
+          // pass
+        } else {
+          this.$confirm('确定要删除这些数据?', '警告', {
+            confirmButtonText: '无论如何都要',  // left cancel right confirm
+            cancelButtonText: '算了，放弃',
+            type: 'warning'
+          })
+            .then(() => {  // press confirm btn
+              const ids = queryAllID(this.multipleSelection);
+              for (let index = 0; index < ids.length; index++) {
+                userDataCache.factoryData.assetsBody.removeAssetByID(ids[index]);
+              }
+              persistence();
+              this.$refs.assetsTable.clearSelection();
+              this.$message({
+                showClose: true,
+                message: '已删除数据,若删除了预算计划请重新设置',
+                type: 'success'
+              });
+              if (!userDataCache.factoryData.assetsBody.findAssetByID('budget')) {
+                this.changePage('setting');
+              }
+            })
+            .catch(() => {  // press cancel btn
+              this.$refs.assetsTable.clearSelection();
+              this.$message({
+                type: 'info',
+                showClose: true,
+                message: '已取消删除'
+              });
+            });
+        }
+      },
+
+
+      cancelUESelect: function () {
+        this.$refs.ueTable.clearSelection();
+      },
+      delectUESelect: function () {
+        if (this.multipleSelection.length < 1) {
+          // pass
+        } else {
+          this.$confirm('确定要删除这些数据?', '警告', {
+            confirmButtonText: '无论如何都要',  // left cancel right confirm
+            cancelButtonText: '算了，放弃',
+            type: 'warning'
+          })
+            .then(() => {  // press confirm btn
+              const ids = queryAllID(this.multipleSelection);
+              for (let index = 0; index < ids.length; index++) {
+                userDataCache.factoryData.ueBody.removeUEByID(ids[index]);
+              }
+              persistence();
+              this.$refs.ueTable.clearSelection();
+              this.$message({
+                showClose: true,
+                message: '已删除数据，请手动重新设置预算计划以调整储蓄额',
+                type: 'success'
+              });
+              this.changePage('setting');
+            })
+            .catch(() => {  // press cancel btn
+              this.$refs.ueTable.clearSelection();
+              this.$message({
+                type: 'info',
+                showClose: true,
+                message: '已取消删除'
+              });
+            });
+        }
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      }
+    }
+  });
+
+  // 程序执行入口
+  // exists为true时不意味着就有预算计划，可能只是有其他资产或者待摊费用，只有budgetExists为true才是真的保存了预算计划
+  let exists = false;
+  let budgetExists = false;
+  queryCache();
+
+  // 启动的主要执行代码核心
+  ipcRenderer.on('MTOR', (event, arg) => {
+    if (arg.exists === true) {
+      exists = true;
+      userDataCache.userDataOldMeta = arg.data.meta;
+      userDataCache.factoryData.assetsBody.assets = arg.data.assets;
+      userDataCache.factoryData.ueBody.ueItems = arg.data.ueItems;
+      userDataCache.factoryData.operations.operations = arg.data.operations;
+      // 清理掉费用为0而且过期的待摊费用
+      userDataCache.factoryData.ueBody.cleanOutofDateUE();
+      if (!userDataCache.factoryData.assetsBody.hasBudget()) {
+        vm.supriseMTF();
+      } else {
+        budgetExists = true;
+        if (sameYearMonth(userDataCache.userDataOldMeta)) {
+          cleanDayAverageAndDayCost(userDataCache.userDataOldMeta);
+          assetAndUEViewSync();
+        } else {
+          if (UEExists(userDataCache.factoryData.ueBody.ueItems)) {
+            vm.ueTips();
+            vm.supriseMTF();
+          } else {
+            vm.supriseMTF();
+          }
+        }
+      }
+    }
+    if (arg.exists === false) {
+      vm.supriseMTF();
+    }
+  });
+
+  // 用于持久化后更新视图
+  ipcRenderer.on('MTORUpdateView', (event, arg) => {
+    exists = true;
+    userDataCache.userDataOldMeta = arg.data.meta;
+    userDataCache.factoryData.assetsBody.assets = arg.data.assets;
+    userDataCache.factoryData.ueBody.ueItems = arg.data.ueItems;
+    userDataCache.factoryData.operations.operations = arg.data.operations;
+    userDataCache.factoryData.ueBody.cleanOutofDateUE();
+    if (userDataCache.factoryData.assetsBody.hasBudget()) {
+      budgetExists = true;
+    }
+    assetAndUEViewSync();
+    queryCacheForCheck();
+  });
+
+  // 检查是否需要持久化数据，对应queryCacheForCheck函数
+  ipcRenderer.on('MTORNeedPersistence', (event, arg) => {
+    let as = arg.data.assets;
+    for (const index in as) {
+      if (as[index].id === 'budget') {
+        if (as[index].dayAverage === 0) {
+          persistence();
+        }
+      }
+    }
+  });
+</script>
+</html>
