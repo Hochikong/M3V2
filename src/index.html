@@ -867,6 +867,19 @@
       appendExpendDialog: function () {
         // 默认的单项支出添加
         if (this.singleExpendItem) {
+          // validate
+          let allRequire = dataRequireCheckPass(vueData, [['dayCost', 0]]);
+          if (!allRequire) {
+            this.dataRequireAlert();
+            this.dayCost = 0;
+            return true;
+          }
+          let cleanUp = this.multipleTypeCheck(this.dayCost);
+          if (cleanUp) {
+            this.dayCost = 0;
+            return true;
+          }
+
           let queryResult = userDataCache.factoryData.assetsBody.findAssetByID('budget');
           queryResult.dayCost += parseFloat(this.dayCost);
           queryResult.dayAverage -= parseFloat(this.dayCost);
@@ -880,6 +893,19 @@
           });
           // 自动计算支出
         } else {
+          // validate
+          let allRequire = dataRequireCheckPass(vueData, [['dayCost', 0]]);
+          if (!allRequire) {
+            this.dataRequireAlert();
+            this.dayCost = 0;
+            return true;
+          }
+          let cleanUp = this.multipleTypeCheck(this.dayCost);
+          if (cleanUp) {
+            this.dayCost = 0;
+            return true;
+          }
+
           let queryResult = userDataCache.factoryData.assetsBody.findAssetByID('budget');
           let oldAmount = queryResult.amount;
           let todayCost = oldAmount - parseFloat(this.dayCost);
