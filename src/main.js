@@ -32,11 +32,13 @@ const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
-    height: 599,
+    height: 579,
     show: false,
     resizable: false,
     backgroundColor: '#938D7F',
   });
+  // hide menu
+  mainWindow.setMenu(null);
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
@@ -44,7 +46,7 @@ const createWindow = () => {
     mainWindow.show();
   });
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -87,7 +89,7 @@ function createNewHelpWindow(father) {
   const tmp = new BrowserWindow({
     parent: father,
     width: 700,
-    height: 707,
+    height: 686,
     show: false,
     resizable: false,
     backgroundColor: '#938D7F',

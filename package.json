@@ -1,6 +1,6 @@
 {
   "name": "m3v2",
-  "productName": "Month Money Manager V2",
+  "productName": "M3V2",
   "version": "1.0.0",
   "description": "A budget control tool",
   "main": "src/main.js",
@@ -52,8 +52,6 @@
     "electron": "latest",
     "electron-compile": "^6.4.3",
     "electron-squirrel-startup": "^1.0.0",
-    "element-theme": "^2.0.1",
-    "element-ui": "^2.4.7",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
