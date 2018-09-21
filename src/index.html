@@ -642,7 +642,7 @@
       // 添加预算计划
       updateBudget: function () {
         // 判断数据有没有全部输入
-        let allRequire = dataRequireCheckPass(vueData, [['budgetTotal', 0], ['budgetDeposit', 0]]);
+        let allRequire = dataRequireCheckPass(vueData, [['budgetTotal', 0]]);
         if (!allRequire) {
           this.dataRequireAlert();
           this.cleanAssetUpdateInput();
