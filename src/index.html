@@ -20,7 +20,7 @@
 <head>
     <meta charset="UTF-8">
     <title>MMM v2 预算管理软件</title>
-    <!-- 引入1953主题 -->
+    <!-- 引入1953主题 -->a
     <link rel="stylesheet" href="local-lib/index.css">
     <!-- 自定义css -->
     <link rel="stylesheet" href="local-lib/corestylesheet.css">
@@ -819,7 +819,7 @@
           }
         });
         let delta = queryResult0.remain - parseFloat(this.ueThisMonth);
-        queryResult0.remain = delta > 0 ? delta : 0;
+        queryResult0.remain = delta > 0 ? parseFloat(delta.toFixed(2)) : 0;
         let queryResult = userDataCache.factoryData.assetsBody.findAssetByID('budget');
         queryResult.deposit = queryResult.deposit + parseFloat(this.ueThisMonth);
         queryResult.remain = queryResult.amount - queryResult.deposit;
