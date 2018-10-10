@@ -113,13 +113,12 @@
                                     </el-input>
                                     <br>
                                     <br>
-                                    <el-tooltip class="item" effect="dark" content="默认一笔一笔追加支出，选择自动计算则
-                                        自动计算原资金与现资金余额的差值" placement="bottom">
+                                    <el-tooltip class="item" effect="dark" content='当文字从黑色变为浅色时表示该选项已激活，详细请看Help' placement="bottom">
                                         <el-switch
                                                 style="display: block"
                                                 v-model="singleExpendItem"
                                                 active-color="#938D7F"
-                                                inactive-color="#116C3C"
+                                                inactive-color="#FF4831"
                                                 active-text="单笔支出追加"
                                                 inactive-text="自动计算支出">
                                         </el-switch>
@@ -804,7 +803,7 @@
           this.cleanAmortizeInput();
           return true;
         }
-        let cleanUp = this.multipleTypeCheck(this.ueThisMonth);
+        let cleanUp = this.multipleTypeCheck([this.ueThisMonth, ]);
         if (cleanUp) {
           this.cleanAmortizeInput();
           return true;
@@ -874,7 +873,7 @@
             this.dayCost = 0;
             return true;
           }
-          let cleanUp = this.multipleTypeCheck(this.dayCost);
+          let cleanUp = this.multipleTypeCheck([this.dayCost, ]);
           if (cleanUp) {
             this.dayCost = 0;
             return true;
@@ -900,7 +899,7 @@
             this.dayCost = 0;
             return true;
           }
-          let cleanUp = this.multipleTypeCheck(this.dayCost);
+          let cleanUp = this.multipleTypeCheck([this.dayCost, ]);
           if (cleanUp) {
             this.dayCost = 0;
             return true;
@@ -943,7 +942,7 @@
         });
       },
 
-      // 检查指定的变量是否为数值类型
+      // 检查指定的变量是否为数值类型,如果统计不为数值类型的参数数量大于0就抛出警告
       multipleTypeCheck: function (parameters) {
         let notNumericCount = 0;
         for (const index in parameters) {
@@ -964,7 +963,7 @@
 
       // 关于窗口
       showAbout: function () {
-        alert('Build version 1.0.0-fix\n' +
+        alert('Build version 1.1.0\n' +
           'Copyright 2018 Hochikong \nAll Rights Reserved. \n\n' +
           '此程序基于Apache License 2.0 许可证开源\n' +
           'Email: ckhoidea@hotmail.com');

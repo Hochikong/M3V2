@@ -1,7 +1,7 @@
 {
   "name": "m3v2",
   "productName": "M3V2",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A budget control tool",
   "main": "src/main.js",
   "scripts": {
